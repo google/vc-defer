@@ -20,6 +20,8 @@
 
 ;;; Commentary:
 
+;; This package makes Emacs VC operations fast(er).
+;;
 ;; The Defer-Vc package aims to make Emacs faster by deferring
 ;; non-essential work related to Emacs' built in "VC" mode, with a
 ;; minimum negative impact.  In particular, all VC commands should
@@ -115,6 +117,9 @@ function `defer-vc-mode' for more information."
 A buffer with a deferred VC state will have its true VC state
 determined using an \"only as needed\" heuristic.")
 
+(defvar defer-vc-deferring nil
+  "Non-nil when the `defer-vc-backends` are disabled.")
+
 (defun defer-vc-remove-backends (original)
   "Return a copy of ORIGINAL with `defer-vc-backends' removed."
   (let (filtered)
@@ -134,19 +139,27 @@ called again later.
 This function is intended to be used as \"around\" advice for
 common Emacs functions such as `auto-revert-handler' and
 `after-find-file'."
-  (let ((vc-handled-backends
-         (defer-vc-remove-backends vc-handled-backends)))
-    (apply orig-fun args)
-    (if (not (vc-backend buffer-file-name))
-        (setq defer-vc-deferred t))))
+  (cond ((null buffer-file-name)
+         (apply orig-fun args))
+        (t
+         (let ((defer-vc-deferring t)
+               (vc-handled-backends
+                (defer-vc-remove-backends vc-handled-backends)))
+           (apply orig-fun args)))))
+
+(defun defer-vc-track-backend (&rest _args)
+  ""
+  (when (and defer-vc-deferring
+             (not (local-variable-p 'defer-vc-deferred)))
+    (setq defer-vc-deferred (not (vc-backend buffer-file-name)))))
 
 (defun defer-vc-refresh-state ()
   "Call `vc-refresh-state' on all deferred buffers.
 
 All buffers with the buffer local variable `defer-vc-deferred'
 set will have fresh VC state after this call."
-  (with-temp-message "Refreshing VC state for deferred buffers..."
-    (dolist (buffer (buffer-list))
+  (dolist (buffer (buffer-list))
+    (with-temp-message (format "Refreshing VC state for buffer %s..." buffer)
       (when (buffer-local-value 'defer-vc-deferred buffer)
         (with-current-buffer buffer
           (setq defer-vc-deferred nil)
@@ -187,15 +200,15 @@ FUNCTIONS will have the advice removed."
   "Add all advice needed by Defer-Vc mode."
   (defer-vc-advice-add-many
     defer-vc-remove-backend-around-funcs 'defer-vc-remove-backends-around)
-  (defer-vc-advice-add-many
-    defer-vc-refresh-state-around-funcs 'defer-vc-refresh-state-around))
+  (advice-add 'vc-deduce-fileset :around 'defer-vc-refresh-state-around)
+  (advice-add 'vc-refresh-state :after 'defer-vc-track-backend))
 
 (defun defer-vc-advice-remove ()
   "Remove all advice added by Defer-Vc mode."
   (defer-vc-advice-remove-many
     defer-vc-remove-backend-around-funcs 'defer-vc-remove-backends-around)
-  (defer-vc-advice-remove-many
-    defer-vc-refresh-state-around-funcs 'defer-vc-refresh-state-around))
+  (advice-remove 'vc-deduce-fileset 'defer-vc-refresh-state-around)
+  (advice-remove 'vc-refresh-state 'defer-vc-track-backend))
 
 (defun defer-vc-turn-on ()
   "Turn Defer-Vc mode on."
@@ -204,6 +217,10 @@ FUNCTIONS will have the advice removed."
 (defun defer-vc-turn-off ()
   "Turn Defer-Vc mode off."
   (defer-vc-advice-remove)
+  (dolist (buffer (buffer-list))
+    (if (local-variable-p 'defer-vc-deferred buffer)
+        (with-current-buffer buffer
+          (kill-local-variable 'defer-vc-deferred))))
   (defer-vc-refresh-state))
 
 (define-minor-mode defer-vc-mode
@@ -226,6 +243,12 @@ refresh the state explicitly by executing \\[vc-refresh-state]."
   (if defer-vc-mode
       (defer-vc-turn-on)
     (defer-vc-turn-off)))
+
+(defun defer-vc-unload-function ()
+  "Unload Defer-Vc.
+
+This turns the mode off."
+  (defer-vc-mode nil))
 
 (provide 'defer-vc)
 

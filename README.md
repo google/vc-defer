@@ -68,3 +68,13 @@ itself.  See
 https://lists.gnu.org/archive/html/emacs-devel/2016-02/msg00440.html.
 
 Until then, this little hack can ease the pain.
+
+# License
+
+Apache 2.0; see LICENSE.txt for details.
+
+# Disclaimer
+
+This project is not an official Google project. It is not supported by Google
+and Google specifically disclaims all warranties as to its quality,
+merchantability, or fitness for a particular purpose.
