@@ -130,11 +130,13 @@ determined using an \"only as needed\" heuristic.")
 (defun vc-defer--remove-backends-around (orig-fun &rest args)
   "Call ORIG-FUN with ARGS, with a trimmed set of active VC backends.
 
-Maybe.  XXX: explain.
+Maybe.  The set of VC backends is trimmed unless the current
+buffer's variable `buffer-file-name' is nil, or is in a mode that VC
+treats specially.
 
-Temporarily binds `vc-handled-backends' to a copy of itself with
-`vc-defer-backends' removed, disabling those backends for the
-call.  If VC fails to find a backend for the buffer, set
+Otherwise, temporarily binds `vc-handled-backends' to a copy of
+itself with `vc-defer-backends' removed, disabling those backends
+for the call.  If VC fails to find a backend for the buffer, set
 `vc-defer-deferred' on the buffer, which arranges for it to be
 called again later.
 
@@ -157,7 +159,15 @@ common Emacs functions such as `auto-revert-handler' and
     (apply orig-fun args)))
 
 (defun vc-defer--refresh-state-after (&rest _args)
-  ""
+  "Set `vc-defer-deferred' if warranted.
+
+When variable `vc-mode' is on this is run as advice after
+`vc-refresh-state'.
+
+It sets the buffer local variable `vc-defer-deferred' if it
+appears that the our temporary reduction of `vc-handled-backends'
+may have caused the file to be attributed to a different, or no,
+backend."
   (when (and vc-defer-deferring
              (not (local-variable-p 'vc-defer-deferred)))
     ;; NOTE: alternatively we could do this, at the cost of breaking
@@ -168,6 +178,13 @@ common Emacs functions such as `auto-revert-handler' and
     ;;                (eq 'none (vc-file-getprop
     ;;                           (expand-file-name buffer-file-name)
     ;;                           'vc-backend)))))
+    ;;
+    ;; FIXME: note that this is subtly wrong.  The trimmed set of
+    ;; `vc-handled-backends' may allow one VC backend to be selected
+    ;; when another would have been.  The correct logic would be: set
+    ;; `vc-deferred' if there is no backend set *or* if the backend
+    ;; that was set appears after one of the `vc-defer-backends' in
+    ;; the user's `vc-handled-backends'.  --Matt
     (setq vc-defer-deferred (not (vc-backend buffer-file-name)))))
 
 (defun vc-defer--refresh-deferred-state (buffers)
@@ -206,27 +223,27 @@ already been called."
       (list (current-buffer))))
   (apply orig-fun args))
 
-(defun vc-defer-advice-add ()
+(defun vc-defer--advice-add ()
   "Add all advice needed by Vc-Defer mode."
   (advice-add 'auto-revert-handler :around 'vc-defer--remove-backends-around)
   (advice-add 'after-find-file :around 'vc-defer--remove-backends-around)
   (advice-add 'vc-deduce-fileset :around 'vc-defer--deduce-fileset-around)
   (advice-add 'vc-refresh-state :after 'vc-defer--refresh-state-after))
 
-(defun vc-defer-advice-remove ()
+(defun vc-defer--advice-remove ()
   "Remove all advice added by Vc-Defer mode."
   (advice-remove 'auto-revert-handler 'vc-defer--remove-backends-around)
   (advice-remove 'auto-revert-handler 'vc-defer--remove-backends-around)
   (advice-remove 'vc-deduce-fileset 'vc-defer--deduce-fileset-around)
   (advice-remove 'vc-refresh-state 'vc-defer--refresh-state-after))
 
-(defun vc-defer-turn-on ()
+(defun vc-dever--turn-on ()
   "Turn Vc-Defer mode on."
-  (vc-defer-advice-add))
+  (vc-defer--advice-add))
 
-(defun vc-defer-turn-off ()
+(defun vc-dever--turn-off ()
   "Turn Vc-Defer mode off."
-  (vc-defer-advice-remove)
+  (vc-defer--advice-remove)
   (dolist (buffer (buffer-list))
     (if (local-variable-p 'vc-defer-deferred buffer)
         (with-current-buffer buffer
@@ -251,8 +268,8 @@ refresh the state explicitly by executing \\[vc-refresh-state]."
   :global t                           ; This mode is not buffer local.
   :lighter " VcDefer"
   (if vc-defer-mode
-      (vc-defer-turn-on)
-    (vc-defer-turn-off)))
+      (vc-dever--turn-on)
+    (vc-dever--turn-off)))
 
 (defun vc-defer-unload-function ()
   "Unload Vc-Defer.
@@ -260,24 +277,39 @@ refresh the state explicitly by executing \\[vc-refresh-state]."
 This turns the mode off."
   (vc-defer-mode nil))
 
-(if nil
-    (progn
-      (global-auto-revert-mode 0)
-      (dolist (func
-               '(
-                 ;;auto-revert-handler
-                 after-find-file
-                 vc-deduce-fileset
-                 vc-refresh-state
-                 vc-backend
-                 vc-file-setprop
-                 vc-file-getprop
-                 vc-file-clearprops
-                 vc-defer--deduce-fileset-around
-                 vc-defer--refresh-deferred-state
-                 vc-defer--refresh-state-after
-                 vc-defer--remove-backends-around))
-        (trace-function-background func))))
+(defun vc-defer--trace ()
+  "Trace the calls to key functions related to `vc-defer' mode.
+
+The aim is to facilitate debugging.  This function is not
+interactive; it is intended for experts only.  Use
+\\[eval-expression] or an equivalent mechanism to invoke it.
+
+First, \\[global-auto-revert-mode] is turned off.  Second, a set
+of interesting commands are traced with
+\\[trace-function-background].  See the results in the buffer
+`trace-buffer'.
+
+Use \\[untrace-all] to turn tracing off.  If you want to turn
+global auto reverts back on, use \\[global-auto-revert-mode]."
+  (interactive)
+  (global-auto-revert-mode 0)
+  (dolist (func
+           '(after-find-file
+             ;; auto-revert-handler is quite noisy, so it is normally
+             ;; disabled.
+             ;; auto-revert-handler
+             vc-backend
+             vc-deduce-fileset
+             vc-defer--deduce-fileset-around
+             vc-defer--refresh-deferred-state
+             vc-defer--refresh-deferred-state
+             vc-defer--refresh-state-after
+             vc-defer--remove-backends-around
+             vc-file-clearprops
+             vc-file-getprop
+             vc-file-setprop
+             vc-refresh-state))
+    (trace-function-background func)))
 
 (provide 'vc-defer)
 
