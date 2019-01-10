@@ -2,7 +2,7 @@
 
 This package makes Emacs VC operations fast(er).
 
-The Defer-Vc package aims to make Emacs faster by deferring non-essential work
+The Vc-Defer package aims to make Emacs faster by deferring non-essential work
 related to Emacs' built in "VC" mode, with a minimum negative impact.  In
 particular, all VC commands should still work normally when invoked explicitly,
 even in buffers that Emacs has not yet determined the VC state for.
@@ -11,20 +11,20 @@ Usage is simple: require the package, configure the list of problematic backends
 (there are no defaults), and enable `defer-vc-mode` (a global mode).  For
 example:
 
-    (require 'defer-vc)
-    (add-to-list 'defer-vc-backends 'Hg)
-    (defer-vc-mode)
+    (require 'vc-defer)
+    (add-to-list 'vc-defer-backends 'Hg)
+    (vc-defer-mode)
 
 ...or a similar use-package incantation:
 
-    (use-package defer-vc
+    (use-package vc-defer
       :config
-      (add-to-list 'defer-vc-backends 'Hg)
-      (defer-vc-mode))
+      (add-to-list 'vc-defer-backends 'Hg)
+      (vc-defer-mode))
 
-The `defer-vc` customization group used for a similar effect.
+The `vc-defer` customization group used for a similar effect.
 
-Regardless of the configuration approach, when `defer-vc-mode` is on, opening
+Regardless of the configuration approach, when `vc-defer-mode` is on, opening
 files no longer enables VC mode for the set of configured backends.  Instead,
 the per-file status in those backends are determined on a deferred, as needed,
 basis.  The VC status will no longer be displayed in the mode line (at least,
@@ -71,7 +71,13 @@ Until then, this little hack can ease the pain.
 
 # License
 
-Apache 2.0; see LICENSE.txt for details.
+GPLv3; see LICENSE for details.
+
+# License note
+
+Google is generally willing to assign copyright of code to the FSF for the
+purpose of contributing it to Emacs. All it takes is finding a Google employee
+willing to drive the process.
 
 # Disclaimer
 
