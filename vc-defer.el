@@ -2,6 +2,8 @@
 
 ;; Copyright 2019 Google LLC
 
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
 ;; Author: Matt Armstrong <marmstrong@google.com>
 ;; Keywords: vc tools
 
