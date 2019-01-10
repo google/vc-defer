@@ -8,7 +8,7 @@ particular, all VC commands should still work normally when invoked explicitly,
 even in buffers that Emacs has not yet determined the VC state for.
 
 Usage is simple: require the package, configure the list of problematic backends
-(there are no defaults), and enable `defer-vc-mode` (a global mode).  For
+(there are no defaults), and enable `vc-defer-mode` (a global mode).  For
 example:
 
     (require 'vc-defer)
