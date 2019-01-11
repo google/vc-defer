@@ -78,12 +78,6 @@ version.
 
 See LICENSE for details.
 
-# License note
-
-Google is generally willing to assign copyright of code to the FSF for the
-purpose of contributing it to Emacs. All it takes is finding a Google employee
-willing to drive the process.
-
 # Disclaimer
 
 This project is not an official Google project. It is not supported by Google
