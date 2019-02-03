@@ -239,11 +239,11 @@ already been called."
   (advice-remove 'vc-deduce-fileset 'vc-defer--deduce-fileset-around)
   (advice-remove 'vc-refresh-state 'vc-defer--refresh-state-after))
 
-(defun vc-dever--turn-on ()
+(defun vc-defer--turn-on ()
   "Turn Vc-Defer mode on."
   (vc-defer--advice-add))
 
-(defun vc-dever--turn-off ()
+(defun vc-defer--turn-off ()
   "Turn Vc-Defer mode off."
   (vc-defer--advice-remove)
   (dolist (buffer (buffer-list))
@@ -270,8 +270,8 @@ refresh the state explicitly by executing \\[vc-refresh-state]."
   :global t                           ; This mode is not buffer local.
   :lighter " VcDefer"
   (if vc-defer-mode
-      (vc-dever--turn-on)
-    (vc-dever--turn-off)))
+      (vc-defer--turn-on)
+    (vc-defer--turn-off)))
 
 (defun vc-defer-unload-function ()
   "Unload Vc-Defer.
