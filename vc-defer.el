@@ -123,11 +123,17 @@ determined using an \"only as needed\" heuristic.")
   "Non-nil when the `vc-defer-backends` are disabled.")
 
 (defun vc-defer-remove-backends (original)
-  "Return a copy of ORIGINAL with `vc-defer-backends' removed."
+  "Return a copy of ORIGINAL after effecting `vc-defer-backends'.
+
+This truncates ORIGIONAL after the first backend from
+`vc-defer-backends'.  This way, no file will be assigned a
+backend that might have been handled by one of the deferred ones."
   (let (filtered)
-    (dolist (element original filtered)
-      (unless (member element vc-defer-backends)
-        (setq filtered (cons element filtered))))))
+    (catch 'early
+      (dolist (element original filtered)
+        (if (member element vc-defer-backends)
+            (throw 'early filtered)
+          (setq filtered (cons element filtered)))))))
 
 (defun vc-defer--remove-backends-around (orig-fun &rest args)
   "Call ORIG-FUN with ARGS, with a trimmed set of active VC backends.
