@@ -276,8 +276,9 @@ refresh the state explicitly by executing \\[vc-refresh-state]."
 (defun vc-defer-unload-function ()
   "Unload Vc-Defer.
 
-This turns the mode off."
-  (vc-defer-mode nil))
+Called by \\[unload-feature].  This turns the mode off, which has
+the effect of uninstalling all advice and hooks."
+  (vc-defer-mode -1))
 
 (defun vc-defer--trace ()
   "Trace the calls to key functions related to `vc-defer' mode.
@@ -303,7 +304,6 @@ global auto reverts back on, use \\[global-auto-revert-mode]."
              vc-backend
              vc-deduce-fileset
              vc-defer--deduce-fileset-around
-             vc-defer--refresh-deferred-state
              vc-defer--refresh-deferred-state
              vc-defer--refresh-state-after
              vc-defer--remove-backends-around
