@@ -245,12 +245,12 @@ already been called."
 
 (defun vc-defer--turn-off ()
   "Turn Vc-Defer mode off."
+  (vc-defer--refresh-deferred-state (buffer-list))
   (vc-defer--advice-remove)
   (dolist (buffer (buffer-list))
     (if (local-variable-p 'vc-defer-deferred buffer)
         (with-current-buffer buffer
-          (kill-local-variable 'vc-defer-deferred))))
-  (vc-defer--refresh-all-deferred-state))
+          (kill-local-variable 'vc-defer-deferred)))))
 
 (define-minor-mode vc-defer-mode
   "Toggle Vc-Defer mode.
