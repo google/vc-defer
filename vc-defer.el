@@ -293,8 +293,9 @@ The aim is to facilitate debugging.  This function is not
 interactive; it is intended for experts only.  Use
 \\[eval-expression] or an equivalent mechanism to invoke it.
 
-First, \\[global-auto-revert-mode] is turned off.  Second, a set
-of interesting commands are traced with
+First, \\[global-auto-revert-mode] is turned off, which prevents
+periodic invocation of VC functions.  Second, a set of
+interesting commands are traced with
 \\[trace-function-background].  See the results in the buffer
 `trace-buffer'.
 
@@ -304,8 +305,9 @@ global auto reverts back on, use \\[global-auto-revert-mode]."
   (global-auto-revert-mode 0)
   (dolist (func
            '(after-find-file
-             ;; auto-revert-handler is quite noisy, so it is normally
-             ;; disabled.
+             ;; auto-revert-handler is quite noisy, so do not trace it
+             ;; by default.
+             ;;
              ;; auto-revert-handler
              vc-backend
              vc-deduce-fileset
