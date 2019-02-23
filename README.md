@@ -1,6 +1,6 @@
 # Introduction
 
-This package makes Emacs VC operations fast(er).
+This package makes (some) Emacs VC operations fast(er).
 
 The Vc-Defer package aims to make Emacs faster by deferring non-essential work
 related to Emacs' built in "VC" mode, with a minimum negative impact.  In
