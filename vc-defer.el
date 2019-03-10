@@ -289,24 +289,36 @@ interesting commands are traced with
 Use \\[untrace-all] to turn tracing off.  If you want to turn
 global auto reverts back on, use \\[global-auto-revert-mode]."
   (interactive)
-  (global-auto-revert-mode 0)
-  (dolist (func
-           '(after-find-file
-             ;; auto-revert-handler is quite noisy, so do not trace it
-             ;; by default.
-             ;;
-             ;; auto-revert-handler
-             vc-backend
-             vc-deduce-fileset
-             vc-file-clearprops
-             vc-file-getprop
-             vc-file-setprop
-             vc-refresh-state))
-    (trace-function-background func))
-  (mapatoms #'(lambda (symbol)
-                (if (and (functionp symbol)
-                         (string-prefix-p "vc-defer-" (symbol-name symbol)))
-                    (trace-function-background symbol)))))
+  (let ((was-enabled vc-defer-mode))
+    (vc-defer-mode -1)
+    ;; Turn off global-auto-revert-mode, auto-revert-mode, and
+    ;; auto-revert-tail-mode everywhere.  These run on a timer, and so
+    ;; are very intrusive in the trace output.
+    (global-auto-revert-mode 0)
+    (dolist (buffer (buffer-list))
+      (if auto-revert-mode
+          (auto-revert-mode -1))
+      (if auto-revert-tail-mode
+          (auto-revert-tail-mode -1)))
+    (dolist (func
+             '(after-find-file
+               ;; auto-revert-handler is quite noisy, so do not trace it
+               ;; by default.
+               ;;
+               ;; auto-revert-handler
+               vc-backend
+               vc-deduce-fileset
+               vc-file-clearprops
+               vc-file-getprop
+               vc-file-setprop
+               vc-refresh-state))
+      (trace-function-background func))
+    (mapatoms #'(lambda (symbol)
+                  (if (and (functionp symbol)
+                           (string-prefix-p "vc-defer-" (symbol-name symbol)))
+                      (trace-function-background symbol))))
+    (if was-enabled
+        (vc-defer-mode 1))))
 
 (provide 'vc-defer)
 
