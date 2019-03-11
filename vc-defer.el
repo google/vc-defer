@@ -203,17 +203,25 @@ property, and setting the actual VC backend."
 (defun vc-defer--deduce-fileset-around (orig-fun &rest args)
   "Call ORIG-FUN with ARGS after performing deferred actions.
 
-If XXX is set on any buffers, first call `vc-refresh-state' on
-all of them.
+This function is installed as \"around\" advice for
+`vc-deduce-fileset`, which see for more information.
 
-This function is intended to be used as \"around\" advice for VC
-functions that otherwise expect `vc-refresh-state' to have
-already been called."
+First calls `vc-refresh-state' either on the current buffer or on
+all deferred buffers.  In the latter case, this may well be
+overkill, but the logic in `vc-deduce-fileset` is complex, which
+makes behavior that is closer to optimal difficult."
   ;; Refresh deferred state in all buffers for the conditions where
   ;; `vc-deduce-fileset' may produce a set of files, since we want it
   ;; to have correct info about all open buffers.  See similar logic
   ;; in `vc-defer--defer-around'.  Otherwise, refresh only
   ;; the current buffer.
+  ;;
+  ;; Rather than refreshing state for all buffers, a possible
+  ;; improvement might be to advise `vc-dir-deduce-fileset`,
+  ;; `vc-dired-deduce-fileset` and handle those as special cases.
+  ;; This would be close to re-implementing the logic outside the
+  ;; package.  Preferable would be integration of vc-defer features
+  ;; into vc itself.
   (vc-defer--refresh-deferred-state
     (if (or (derived-mode-p 'dired-mode)
             (derived-mode-p 'log-view-mode)
