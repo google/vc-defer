@@ -8,7 +8,7 @@
 ;; Maintainer: Tom Fitzhenry <tomfitzhenry@google.com>
 ;; Keywords: vc tools
 ;; Package-Requires: ((emacs "25.1"))
-;; Version: 0
+;; Version: 0.1
 ;; URL: https://github.com/google/vc-defer
 
 ;; This program is free software; you can redistribute it and/or modify
