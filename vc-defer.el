@@ -5,6 +5,7 @@
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; Author: Matt Armstrong <marmstrong@google.com>
+;; Maintainer: Tom Fitzhenry <tomfitzhenry@google.com>
 ;; Keywords: vc tools
 ;; Package-Requires: ((emacs "25.1"))
 ;; Version: 0
