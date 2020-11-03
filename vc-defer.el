@@ -1,4 +1,4 @@
-;;; vc-defer.el --- description                       -*- lexical-binding: t; -*-
+;;; vc-defer.el --- Defer non-essential vc.el work -*- lexical-binding: t; -*-
 
 ;; Copyright 2019 Google LLC
 
@@ -6,6 +6,9 @@
 
 ;; Author: Matt Armstrong <marmstrong@google.com>
 ;; Keywords: vc tools
+;; Package-Requires: ((emacs "25.1"))
+;; Version: 0
+;; URL: https://github.com/google/vc-defer
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
