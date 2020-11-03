@@ -257,6 +257,7 @@ makes behavior that is closer to optimal difficult."
   (vc-defer--advice-remove)
   (vc-defer--refresh-deferred-state (buffer-list)))
 
+;;;###autoload
 (define-minor-mode vc-defer-mode
   "Toggle Vc-Defer mode.
 
