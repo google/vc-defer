@@ -308,7 +308,7 @@ global auto reverts back on, use \\[global-auto-revert-mode]."
     ;; auto-revert-tail-mode everywhere.  These run on a timer, and so
     ;; are very intrusive in the trace output.
     (global-auto-revert-mode 0)
-    (dolist (buffer (buffer-list))
+    (dolist (_buffer (buffer-list))
       (if auto-revert-mode
           (auto-revert-mode -1))
       (if auto-revert-tail-mode
