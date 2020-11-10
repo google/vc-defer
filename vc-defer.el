@@ -309,10 +309,9 @@ global auto reverts back on, use \\[global-auto-revert-mode]."
     ;; are very intrusive in the trace output.
     (global-auto-revert-mode 0)
     (dolist (buffer (buffer-list))
-      (if auto-revert-mode
-          (auto-revert-mode -1))
-      (if auto-revert-tail-mode
-          (auto-revert-tail-mode -1)))
+      (with-current-buffer buffer
+        (auto-revert-mode -1)
+        (auto-revert-tail-mode -1)))
     (dolist (func
              '(after-find-file
                ;; auto-revert-handler is quite noisy, so do not trace it
