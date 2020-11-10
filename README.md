@@ -7,6 +7,9 @@ related to Emacs' built in "VC" mode, with a minimum negative impact.  In
 particular, all VC commands should still work normally when invoked explicitly,
 even in buffers that Emacs has not yet determined the VC state for.
 
+*Warning*: Some modes that depend on VC such as
+[diff-hl](https://github.com/dgutov/diff-hl) will break, however.
+
 Usage is simple: require the package, configure the list of problematic backends
 (there are no defaults), and enable `vc-defer-mode` (a global mode).  For
 example:
@@ -32,7 +35,7 @@ until the first VC command is issued), but basic operations like `find-file'
 will be fast.  Emacs will still be slow when VC functionality is actually used,
 but at that point the performance issue will make more sense to the user.
 
- Background
+## Background
 
 Emacs' built in VC implementation slows Emacs down.  This is most evident when
 the VC backend is slow.  The code refreshes information displayed in the mode
