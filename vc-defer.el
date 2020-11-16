@@ -154,14 +154,14 @@ This function is intended to be used as \"around\" advice for
 common Emacs functions such as `auto-revert-handler' and
 `after-find-file'."
   (let* ((vc-defer--backends-are-trimmed
-           ;; Avoid deferring in various scenarios that complicate
-           ;; things significantly.  See `vc-deduce-fileset' for the
-           ;; set of conditions where a VC action doesn't necessarily
-           ;; correspond to the current buffer's file.
-           (not (or (not buffer-file-name)
-                    (derived-mode-p 'dired-mode)
-                    (derived-mode-p 'log-view-mode)
-                    (derived-mode-p 'vc-dir-mode))))
+          ;; Avoid deferring in various scenarios that complicate
+          ;; things significantly.  See `vc-deduce-fileset' for the
+          ;; set of conditions where a VC action doesn't necessarily
+          ;; correspond to the current buffer's file.
+          (not (or (not buffer-file-name)
+                   (derived-mode-p 'dired-mode)
+                   (derived-mode-p 'log-view-mode)
+                   (derived-mode-p 'vc-dir-mode))))
          (vc-handled-backends
           (if vc-defer--backends-are-trimmed
               (vc-defer--remove-backends vc-handled-backends)
@@ -227,11 +227,11 @@ makes behavior that is closer to optimal difficult."
   ;; package.  Preferable would be integration of vc-defer features
   ;; into vc itself.
   (vc-defer--refresh-deferred-state
-    (if (or (derived-mode-p 'dired-mode)
-            (derived-mode-p 'log-view-mode)
-            (derived-mode-p 'vc-dir-mode))
-        (buffer-list)
-      (list (current-buffer))))
+   (if (or (derived-mode-p 'dired-mode)
+           (derived-mode-p 'log-view-mode)
+           (derived-mode-p 'vc-dir-mode))
+       (buffer-list)
+     (list (current-buffer))))
   (apply orig-fun args))
 
 (defun vc-defer--advice-add ()
@@ -329,8 +329,8 @@ global auto reverts back on, use \\[global-auto-revert-mode]."
                   (if (and (functionp symbol)
                            (string-prefix-p "vc-defer-" (symbol-name symbol)))
                       (trace-function-background symbol))))
-    (if was-enabled
-        (vc-defer-mode 1))))
+    (when was-enabled
+      (vc-defer-mode 1))))
 
 (provide 'vc-defer)
 
