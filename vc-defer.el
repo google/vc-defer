@@ -329,7 +329,7 @@ global auto reverts back on, use \\[global-auto-revert-mode]."
                   (if (and (functionp symbol)
                            (string-prefix-p "vc-defer-" (symbol-name symbol)))
                       (trace-function-background symbol))))
-    (if was-enabled
+    (when was-enabled
         (vc-defer-mode 1))))
 
 (provide 'vc-defer)
